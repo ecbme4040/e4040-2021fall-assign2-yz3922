@@ -152,7 +152,9 @@ class SGDmomentumOptim(Optimizer):
         # TODO: SGD + Momentum, Update params and velocitys#
         ###################################################
         
-        print('./utils/optimizers.SGDmomentumOptim.step() not implemented!') # delete me
+        for k in grads:
+            velocitys[k] = momentum * velocitys[k] - learning_rate * grads[k]
+            params[k] += velocitys[k]
         
         ###################################################
         #               END OF YOUR CODE                  #
@@ -189,9 +191,11 @@ class AdaGradOptim(Optimizer):
         ###################################################
         # TODO: RMSprop, Update params and cache           #
         ###################################################
-        
-        print('./utils/optimizers.AdaGradOptim.step() not implemented!') # delete me
-        
+       
+        for k in grads:
+            cache[k] += grads[k] ** 2
+            params[k] -= learning_rate / np.sqrt(cache[k] + eps) * grads[k]
+            
         ###################################################
         #               END OF YOUR CODE                  #
         ###################################################
@@ -240,8 +244,14 @@ class AdamOptim(Optimizer):
         # TODO: Adam, Update t, momentums, velocitys and   #
         # params                                           #
         ###################################################
+        t += 1
+        for k in grads:
+            momentums[k] = beta1 * momentums[k] + (1 - beta1) * grads[k]
+            velocitys[k] = beta2 * velocitys[k] + (1 - beta2) * (grads[k] ** 2)
+            momentums_deco = momentums[k] / (1 - beta1 ** t)
+            velocitys_deco = velocitys[k] / (1 - beta2 ** t)
+            params[k] -= learning_rate * momentums_deco / (np.sqrt(velocitys_deco) + eps)
         
-        print('./utils/optimizers.AdamOptim.step() not implemented!') # delete me
         
         ###################################################
         #               END OF YOUR CODE                  #
@@ -291,8 +301,14 @@ class NadamOptim(Optimizer):
         # TODO: Nadam, Update t, momentums, velocitys and   #
         # params                                           #
         ###################################################
-        
-        print('./utils/optimizers.NadamOptim.step() not implemented!') # delete me
+        t += 1
+        for k in grads:
+            momentums[k] = beta1 * momentums[k] + (1 - beta1) * grads[k]
+            velocitys[k] = beta2 * velocitys[k] + (1 - beta2) * grads[k] ** 2
+            momentums_deco = momentums[k] / (1 - beta1 ** t)
+            velocitys_deco = velocitys[k] / (1 - beta2 ** t)
+            momentums_nag = beta1 * momentums_deco + (1 - beta1) * grads[k]
+            params[k] -= learning_rate * momentums_nag / (np.sqrt(velocitys_deco) + eps)
         
         ###################################################
         #               END OF YOUR CODE                  #

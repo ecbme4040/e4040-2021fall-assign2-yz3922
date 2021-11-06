@@ -106,9 +106,11 @@ class MLP(object):
             ###############################################
             # TODO: Add batch normalization here          #
             ###############################################
-            
-            print('./utils/neuralnets/mlp.MLP.loss() feedforward batch norm not implemented!') # delete me
-            
+            if use_bn:
+                gamma = params["bn_gamma_{}".format(i)]
+                beta = params["bn_beta_{}".format(i)]
+                cache_name = "batchnorm_{}".format(i)
+                x, cache[cache_name] = bn_forward(x, gamma, beta, bn_params[i], "train")
             ###############################################
             # END OF BATCH NORMALIZATION                  #
             ###############################################
@@ -121,9 +123,9 @@ class MLP(object):
             ###############################################
             # TODO: Add dropout here                      #
             ###############################################
-            
-            print('./utils/neuralnets/mlp.MLP.loss() feedforward dropout not implemented!') # delete me
-
+            if dropout_config['enabled']:
+                cache_name = "mask_{}".format(i)
+                x, cache[cache_name] = dropout_forward(x=x, dropout_config=dropout_config, mode="train")
             ###############################################
             # END OF DROPOUT                              #
             ###############################################
@@ -149,8 +151,9 @@ class MLP(object):
             # TODO: Add dropout here                      #
             ###############################################
             
-            print('./utils/neuralnets/mlp.MLP.loss() backprop dropout not implemented!') # delete me
-            
+            if dropout_config["enabled"]:
+                dx = dropout_backward(dx, cache["mask_{}".format(j)])
+                
             ###############################################
             # END OF DROPOUT                              #
             ###############################################
@@ -163,8 +166,12 @@ class MLP(object):
             # TODO: Add batch normalization here          #
             ###############################################
             
-            print('./utils/neuralnets/mlp.MLP.loss() backprop batch norm not implemented!') # delete me
-            
+            if use_bn:
+                cache_name = "batchnorm_{}".format(j)
+                dx, dgamma, dbeta = bn_backward(dx, cache[cache_name])
+                grads["bn_gamma_{}".format(j)] = dgamma
+                grads["bn_beta_{}".format(j)] = dbeta
+                
             ###############################################
             # END OF BATCH NORMALIZATION                  #
             ###############################################  
@@ -214,8 +221,11 @@ class MLP(object):
             # TODO: Add batch normalization here          #
             ###############################################
             
-            print('./utils/neuralnets/mlp.MLP.predict() batch norm not implemented!') # delete me
-            
+            if use_bn:
+                gamma = params["bn_gamma_{}".format(i)]
+                beta = params["bn_beta_{}".format(i)]
+                x, _ = bn_forward(x, gamma, beta, bn_params[i], "test")
+                
             ###############################################
             # END OF BATCH NORMALIZATION                  #
             ############################################### 
@@ -227,8 +237,9 @@ class MLP(object):
             # TODO: Add dropout here                      #
             ###############################################
             
-            print('./utils/neuralnets/mlp.MLP.predict() dropout not implemented!') # delete me
-            
+            if dropout_config['enabled']:
+                x, _ = dropout_forward(x=x, dropout_config=dropout_config, mode="test")
+                
             ###############################################
             # END OF DROPOUT                              #
             ###############################################

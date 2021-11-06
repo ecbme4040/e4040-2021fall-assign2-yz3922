@@ -2,6 +2,7 @@
 # ECBM E4040 Fall 2020 Assignment 2
 # TensorFlow custom CNN model
 import tensorflow as tf
+import datetime
 from utils.neuralnets.cnn.model_LeNet import LeNet
 from utils.image_generator import ImageGenerator
 from tqdm import tqdm
@@ -52,7 +53,11 @@ class MyLeNet_trainer():
         #       from part 3
         #############################################################
         
-        print('./utils/neuralnets/cnn/my_LeNet_trainer.MyLeNet_trainer.batch_train_data() not implemeted!') # delete me
+        train_data.translate(2, 0)
+        train_data.add_noise(1, 10)
+        train_data.brightness(1.5)
+        train_data.flip('v')
+        train_data.create_aug_data()
         
         #############################################################
         # END TODO
@@ -93,8 +98,21 @@ class MyLeNet_trainer():
         # hint: use python next feature "next(self.train_data_next_batch)""
         #############################################################
         
-        print('./utils/neuralnets/cnn/my_LeNet_trainer.MyLeNet_trainer.train_epoch() not implemeted!') # delete me
-        
+        for batch in range(self.n_batches):
+            train_x, train_y = next(self.train_data_next_batch)
+            self.train_step(train_x, train_y, training=True)
+
+        if epoch == 0:
+            self.current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            self.train_log_dir = 'logs/gradient_tape/' + self.current_time + '/train'
+            self.test_log_dir = 'logs/gradient_tape/' + self.current_time + '/test'
+            self.train_summary_writer = tf.summary.create_file_writer(self.train_log_dir)
+            self.test_summary_writer = tf.summary.create_file_writer(self.test_log_dir)
+
+        with self.train_summary_writer.as_default():
+            tf.summary.scalar('loss', self.train_loss.result(), step=epoch)
+            tf.summary.scalar('accuracy', self.train_accuracy.result(), step=epoch)
+            
         #############################################################
         # END TODO
         #############################################################

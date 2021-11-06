@@ -28,7 +28,10 @@ def dropout_forward(x, dropout_config, mode):
         # backward.                               #
         ###########################################
         
-        print('./utils/reg_funcs.dropout_forward() train mode not implemented!') # delete me
+       
+        p = np.random.binomial(1,keep_prob, x.shape)
+        cache = p
+        out = x * p
         
         ###########################################
         #             END OF YOUR CODE            #
@@ -40,7 +43,7 @@ def dropout_forward(x, dropout_config, mode):
         # No need to use mask here.              #
         ##########################################
         
-        print('./utils/reg_funcs.dropout_forward() test mode not implemented!') # delete me
+        out = x * keep_prob
         
         ###########################################
         #             END OF YOUR CODE            #
@@ -117,7 +120,16 @@ def bn_forward(x, gamma, beta, bn_params, mode):
         #         moving_mean and moving_var in the bn_params       #
         #############################################################
         
-        print('./utils/reg_funcs.bn_forward() train mode not implemented!') # delete me
+        mean = np.mean(x, axis=0)
+        var = np.var(x, axis=0)
+        
+        current_mean, current_var = mean, var
+        out = gamma*(x-current_mean)/np.sqrt(current_var+eps) + beta
+        
+        moving_mean = decay*moving_mean + (1-decay)*current_mean
+        moving_var = decay*moving_var + (1-decay)*current_var 
+        
+       
         
         #############################################################
         #                       END OF YOUR CODE                    #
@@ -129,8 +141,11 @@ def bn_forward(x, gamma, beta, bn_params, mode):
         # TODO: Batch normalization forward test mode               #
         #############################################################
         
-        print('./utils/reg_funcs.bn_forward() test mode not implemented!') # delete me
-
+        mean = moving_mean
+        var = moving_var
+        x_norm = (x - mean) / np.sqrt(var + eps)
+        out = gamma * x_norm + beta
+        
         #############################################################
         #                       END OF YOUR CODE                    #
         #############################################################
